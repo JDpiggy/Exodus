@@ -3,17 +3,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
     const errorMessage = document.getElementById('errorMessage');
-    const logoutBtn = document.getElementById('logoutBtn'); // On index.html
+    const logoutBtn = document.getElementById('logoutBtn');
 
-    // --- IMPORTANT: CONFIGURE THIS ---
-    // This is the email you registered in Firebase Authentication for the Admin role.
-    const ADMIN_EMAIL_IDENTIFIER = "YOUR_ADMIN_EMAIL_HERE"; // e.g., "admin@exoduscalendar.app"
+    // ADMIN_EMAIL_IDENTIFIER is REMOVED from here. Role is determined by custom claims.
 
-    if (!ADMIN_EMAIL_IDENTIFIER || ADMIN_EMAIL_IDENTIFIER === "YOUR_ADMIN_EMAIL_HERE") {
-        console.error("CRITICAL: ADMIN_EMAIL_IDENTIFIER is not configured in public/js/auth.js!");
-        if (errorMessage) errorMessage.textContent = "Admin email not configured. Please contact support.";
+    // Function to set user role based on custom claims
+    function setUserRoleFromClaims(user) {
+        return user.getIdTokenResult(true) // Force refresh to get latest claims
+            .then((idTokenResult) => {
+                if (idTokenResult.claims.admin === true) { // Check for the 'admin' claim
+                    localStorage.setItem('exodusUserRole', 'admin');
+                } else {
+                    localStorage.setItem('exodusUserRole', 'viewer');
+                }
+                localStorage.setItem('exodusUserUID', user.uid);
+                return localStorage.getItem('exodusUserRole'); // Return the determined role
+            })
+            .catch((error) => {
+                console.error("Error getting ID token result / custom claims:", error);
+                // Fallback to viewer role in case of error fetching claims
+                localStorage.setItem('exodusUserRole', 'viewer');
+                localStorage.setItem('exodusUserUID', user.uid); // Still set UID
+                if (errorMessage) errorMessage.textContent = "Error verifying user role. Defaulting to viewer.";
+                return 'viewer'; // Return fallback role
+            });
     }
-
 
     // Handle Login
     if (loginForm) {
@@ -21,17 +35,15 @@ document.addEventListener('DOMContentLoaded', () => {
             event.preventDefault();
             const email = emailInput.value;
             const password = passwordInput.value;
-            if(errorMessage) errorMessage.textContent = ''; // Clear previous errors
+            if(errorMessage) errorMessage.textContent = '';
 
             auth.signInWithEmailAndPassword(email, password)
                 .then((userCredential) => {
                     const user = userCredential.user;
-                    if (user.email === ADMIN_EMAIL_IDENTIFIER) {
-                        localStorage.setItem('exodusUserRole', 'admin');
-                    } else {
-                        localStorage.setItem('exodusUserRole', 'viewer');
-                    }
-                    localStorage.setItem('exodusUserUID', user.uid);
+                    return setUserRoleFromClaims(user); // Get role from claims
+                })
+                .then((role) => { // Role is now determined
+                    console.log("User logged in with role:", role);
                     window.location.href = 'index.html';
                 })
                 .catch((error) => {
@@ -50,38 +62,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.location.href = 'login.html';
             }).catch((error) => {
                 console.error("Logout error:", error);
-                // Optionally display an error to the user
             });
         });
     }
 
-    // Auth State Change Listener (handles redirects and session persistence)
+    // Auth State Change Listener
     auth.onAuthStateChanged(user => {
-        const currentPage = window.location.pathname.split("/").pop(); // Gets the current HTML file name
-        const isLoggedIn = !!user; // True if user object exists, false otherwise
+        const currentPage = window.location.pathname.split("/").pop();
+        const isLoggedIn = !!user;
         
         if (isLoggedIn) {
-            // User is signed in.
-            // Ensure role is set if not already (e.g., direct navigation after login)
-            if (!localStorage.getItem('exodusUserRole') || localStorage.getItem('exodusUserUID') !== user.uid) {
-                if (user.email === ADMIN_EMAIL_IDENTIFIER) {
-                    localStorage.setItem('exodusUserRole', 'admin');
-                } else {
-                    localStorage.setItem('exodusUserRole', 'viewer');
+            // User is signed in. Set role from claims.
+            setUserRoleFromClaims(user).then(role => {
+                console.log("Auth state changed, user signed in with role:", role);
+                if (currentPage === 'login.html' || currentPage === '') {
+                    window.location.href = 'index.html';
                 }
-                localStorage.setItem('exodusUserUID', user.uid);
-            }
-
-            if (currentPage === 'login.html' || currentPage === '') {
-                // If on login page (or root which might redirect to login) and signed in, go to calendar
-                window.location.href = 'index.html';
-            }
+                // You might want to refresh calendar.js if role changes affect UI elements shown immediately
+                // For example, by dispatching a custom event that calendar.js listens for.
+            });
         } else {
             // User is signed out.
             localStorage.removeItem('exodusUserRole');
             localStorage.removeItem('exodusUserUID');
             if (currentPage !== 'login.html' && currentPage !== '') {
-                // If not on login page and not signed in, redirect to login
                 window.location.href = 'login.html';
             }
         }
