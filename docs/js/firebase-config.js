@@ -1,4 +1,4 @@
-
+console.log("firebase-config.js: Script started.");
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -11,39 +11,45 @@ const firebaseConfig = {
   measurementId: "G-6LT5GHSKCP"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+var auth; // Using var for broader scope for subsequent scripts
+var db;   // Using var
+// var app; // If you need the app instance for v8
 
-// Initialize Firebase
-// This uses the globally available 'firebase' object loaded from the SDK script tags in HTML
 try {
-  if (!firebase.apps.length) { // Check if Firebase has already been initialized
-    firebase.initializeApp(firebaseConfig);
-    console.log("Firebase initialized successfully in firebase-config.js");
-    // if (firebase.analytics && typeof firebase.analytics === 'function') {
-    //   firebase.analytics(); // Uncomment if you've set up Analytics and want to use it
-    // }
-  } else {
-    console.log("Firebase already initialized.");
+  console.log("firebase-config.js: Checking for global firebase object...");
+  if (typeof firebase === 'undefined') {
+    console.error("firebase-config.js: CRITICAL - global 'firebase' object is UNDEFINED. SDKs didn't load or run.");
+    throw new Error("Firebase SDK not loaded.");
   }
+  console.log("firebase-config.js: Global 'firebase' object found:", firebase);
+
+  if (!firebase.apps.length) {
+    console.log("firebase-config.js: Initializing Firebase app using firebase.initializeApp()...");
+    // For v8, initializeApp is a method of the global firebase object
+    /* app = */ firebase.initializeApp(firebaseConfig); // The return value is the app, can assign if needed
+    console.log("firebase-config.js: firebase.initializeApp called.");
+  } else {
+    console.log("firebase-config.js: Firebase app already initialized.");
+    /* app = firebase.app(); */ // Get default app if needed
+  }
+
+  console.log("firebase-config.js: Attempting to get auth and firestore instances using firebase.auth() and firebase.firestore()...");
+  if (firebase.auth) {
+    auth = firebase.auth(); // v8 style
+    console.log("firebase-config.js: 'auth' instance created (v8):", auth ? 'OK' : 'FAILED');
+  } else {
+    console.error("firebase-config.js: CRITICAL - firebase.auth function is UNDEFINED.");
+  }
+
+  if (firebase.firestore) {
+    db = firebase.firestore(); // v8 style
+    console.log("firebase-config.js: 'db' instance created (v8):", db ? 'OK' : 'FAILED');
+  } else {
+    console.error("firebase-config.js: CRITICAL - firebase.firestore function is UNDEFINED.");
+  }
+
 } catch (e) {
-  console.error("CRITICAL: Error initializing Firebase in firebase-config.js:", e);
-  alert("Error initializing Firebase. Please check the console for details. The app may not work correctly.");
+  console.error("firebase-config.js: CRITICAL ERROR in try-catch block:", e);
 }
 
-// Make Firebase services globally accessible via these variables for clarity,
-// though they could also be accessed directly as firebase.auth() and firebase.firestore()
-// in other files, provided this script and the SDKs run first.
-let auth;
-let db;
-
-try {
-  auth = firebase.auth();
-  db = firebase.firestore();
-  if (!auth) console.warn("firebase.auth() is not available after init.");
-  if (!db) console.warn("firebase.firestore() is not available after init.");
-} catch (e) {
-  console.error("CRITICAL: Error accessing firebase.auth() or firebase.firestore() in firebase-config.js:", e);
-  alert("Error accessing Firebase services. Please check the console. The app may not work correctly.");
-}
+console.log("firebase-config.js: Script finished. Final 'auth':", auth, "Final 'db':", db);
