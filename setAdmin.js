@@ -9,7 +9,7 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
 });
 
-const userEmailToMakeAdmin = "admin@yourdomain.com"; // << YOUR ADMIN EMAIL
+const userEmailToMakeAdmin = "jasoncpumpkin247@gmail.com"; // << YOUR ADMIN EMAIL
 
 admin.auth().getUserByEmail(userEmailToMakeAdmin)
   .then((userRecord) => {
