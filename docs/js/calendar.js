@@ -1,5 +1,28 @@
 // docs/js/calendar.js
 
+// Helper function to convert "HH:MM" (24-hour) to "H:MM AM/PM"
+function formatTime12Hour(timeString24) {
+    if (!timeString24 || typeof timeString24 !== 'string' || !timeString24.includes(':')) {
+        return ""; // Return empty or original if format is unexpected
+    }
+    const [hoursString, minutesString] = timeString24.split(':');
+    const hours24 = parseInt(hoursString, 10);
+    const minutes = parseInt(minutesString, 10);
+
+    if (isNaN(hours24) || isNaN(minutes)) {
+        return timeString24; // Return original if parsing failed
+    }
+
+    const ampm = hours24 >= 12 ? 'PM' : 'AM';
+    let hours12 = hours24 % 12;
+    hours12 = hours12 ? hours12 : 12; // Convert 0 to 12 for 12 AM/PM (hour '0' should be '12' AM)
+
+    const minutesPadded = String(minutes).padStart(2, '0');
+
+    return `${hours12}:${minutesPadded} ${ampm}`;
+}
+
+
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof firebase === 'undefined' || typeof db === 'undefined') {
         console.error("CRITICAL: Firebase or db object is not available in calendar.js.");
@@ -27,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveEventBtn = document.getElementById('saveEventBtn');
 
     // --- CONFIGURATION & STATE ---
-    const emptyDayBackgrounds = [ 'images/yo-gurt' /*, more images */ ]; // Ensure correct path & extension
+    const emptyDayBackgrounds = [ 'images/yo-gurt' ];
     let bgIndex = 0;
     let currentDate = new Date();
     let currentMonthEvents = [];
@@ -40,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentRole = localStorage.getItem('exodusUserRole');
         console.log("calendar.js: Initializing/Updating UI for role:", currentRole);
         if (addEventBtn) {
-            if (currentRole === 'uploader') { // Check for "uploader"
+            if (currentRole === 'uploader') {
                 addEventBtn.style.display = 'inline-block';
             } else {
                 addEventBtn.style.display = 'none';
@@ -48,16 +71,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Listen for role updates from auth.js
     window.addEventListener('exodusUserRoleUpdated', (event) => {
         console.log("calendar.js: Received exodusUserRoleUpdated event, new role:", event.detail.role);
         initializeUIForRole();
-        // If role changed from viewer to uploader, might need to re-render calendar day click handlers
-        // For simplicity, a full re-render or re-attachment of admin-specific listeners might be easier
-        // or ensure renderCalendar() checks role when adding dayCell click listeners.
-        if (event.detail.role) { // If user is logged in (role is not null)
+        if (event.detail.role) {
              fetchAndListenForEvents(currentDate.getFullYear(), currentDate.getMonth());
-        } else { // User logged out
+        } else {
             if (unsubscribeFirestoreListener) unsubscribeFirestoreListener();
             currentMonthEvents = [];
             if(calendarGrid) calendarGrid.innerHTML = "<p style='text-align:center;'>Please log in to view events.</p>";
@@ -65,16 +84,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-
     // --- Firestore Event Fetching ---
     function fetchAndListenForEvents(year, month) {
-        // ... (fetchAndListenForEvents function remains largely the same as the last correct version)
-        // ... it should already use `currentMonthEvents` and call `renderCalendar` on snapshot.
-        // Ensure it's properly unsubscribing from previous listeners.
         console.log(`calendar.js: Fetching events for ${year}-${month + 1}`);
         if (unsubscribeFirestoreListener) {
             unsubscribeFirestoreListener();
-            console.log("calendar.js: Unsubscribed from previous Firestore listener.");
         }
         const monthPadded = String(month + 1).padStart(2, '0');
         const firstDayOfMonthStr = `${year}-${monthPadded}-01`;
@@ -101,11 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Calendar Rendering ---
     function renderCalendar(dateToRender) {
-        // ... (renderCalendar function remains largely the same)
-        // IMPORTANT CHANGE: Inside the loop for day cells, when adding click listener for admins:
-        // const currentRoleOnRender = localStorage.getItem('exodusUserRole');
-        // if (currentRoleOnRender === 'uploader') { /* add admin-clickable class and event listener */ }
-        if (!calendarGrid || !monthYearDisplay) { /* ... */ return; }
+        if (!calendarGrid || !monthYearDisplay) { return; }
         console.log("calendar.js: Rendering calendar for", dateToRender.toLocaleDateString());
         calendarGrid.innerHTML = '';
         bgIndex = 0;
@@ -116,13 +126,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         const startingDayOfWeek = firstDayOfMonthDateObj.getDay();
         const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        dayNames.forEach(dayName => { /* ... */ 
+        dayNames.forEach(dayName => {
             const dayHeaderEl = document.createElement('div');
             dayHeaderEl.classList.add('calendar-day-header');
             dayHeaderEl.textContent = dayName;
             calendarGrid.appendChild(dayHeaderEl);
         });
-        for (let i = 0; i < startingDayOfWeek; i++) { /* ... */ 
+        for (let i = 0; i < startingDayOfWeek; i++) {
             const emptyCell = document.createElement('div');
             emptyCell.classList.add('calendar-day', 'other-month');
             calendarGrid.appendChild(emptyCell);
@@ -139,11 +149,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const eventListEl = document.createElement('div');
             eventListEl.classList.add('event-list');
             if (dayEvents.length > 0) {
-                dayEvents.forEach(event => { /* ... eventEl creation and append ... */ 
+                dayEvents.forEach(event => {
                     const eventEl = document.createElement('div');
                     eventEl.classList.add('event-item');
+
+                    // --- TIME FORMATTING CHANGE HERE ---
+                    const startTime12 = event.startTime ? formatTime12Hour(event.startTime) : '';
+                    const endTime12 = event.endTime ? formatTime12Hour(event.endTime) : '';
+                    let timeDisplay = startTime12;
+                    if (endTime12) {
+                        timeDisplay += ` - ${endTime12}`;
+                    }
+                    // --- END TIME FORMATTING CHANGE ---
+
                     eventEl.innerHTML = `
-                        <span class="event-time">${event.startTime || ''} - ${event.endTime || ''}</span>
+                        <span class="event-time">${timeDisplay}</span>
                         <span class="event-title">${(event.description || 'No Title').substring(0, 20)}${(event.description || '').length > 20 ? '...' : ''}</span>
                     `;
                     eventEl.dataset.eventId = event.id;
@@ -161,9 +181,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             dayCell.appendChild(eventListEl);
-            const currentRoleOnRender = localStorage.getItem('exodusUserRole'); // Get current role
-            if (currentRoleOnRender === 'uploader') { // Check for 'uploader'
-                dayCell.classList.add('admin-clickable'); // 'admin-clickable' for CSS if needed
+            const currentRoleOnRender = localStorage.getItem('exodusUserRole');
+            if (currentRoleOnRender === 'uploader') {
+                dayCell.classList.add('admin-clickable'); // Using 'admin-clickable' for CSS consistency
                 dayCell.addEventListener('click', (e) => {
                     if (e.target === dayCell || e.target === dayNumberEl) {
                         openEventModal(null, cellDateStr);
@@ -176,24 +196,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Event Modal Logic ---
     function openEventModal(event = null, dateForNewEvent = null) {
-        // ... (openEventModal function remains largely the same)
-        // IMPORTANT CHANGE: Check for 'uploader' role to enable editing/deleting.
-        // const currentRoleForModal = localStorage.getItem('exodusUserRole');
-        // if (currentRoleForModal === 'uploader') { /* enable form, show delete btn */ } else { /* disable form */ }
         if (!eventModal || !eventForm /*... other elements ...*/) { return; }
         const currentRoleForModal = localStorage.getItem('exodusUserRole');
         eventForm.reset();
         eventIdInput.value = '';
         deleteEventBtn.style.display = 'none';
         if (event) {
-            eventModalTitle.textContent = currentRoleForModal === 'uploader' ? 'Edit Event' : 'View Event'; // Check 'uploader'
+            eventModalTitle.textContent = currentRoleForModal === 'uploader' ? 'Edit Event' : 'View Event';
             eventIdInput.value = event.id;
             eventDateInput.value = event.date;
-            startTimeInput.value = event.startTime;
-            endTimeInput.value = event.endTime;
+            // Values for time inputs remain 24-hour format for the input element
+            startTimeInput.value = event.startTime || '';
+            endTimeInput.value = event.endTime || '';
             locationInput.value = event.location || '';
-            descriptionInput.value = event.description;
-            if (currentRoleForModal === 'uploader') { // Check 'uploader'
+            descriptionInput.value = event.description || '';
+            if (currentRoleForModal === 'uploader') {
                 deleteEventBtn.style.display = 'inline-block';
                 setFormEditable(true);
             } else {
@@ -202,44 +219,38 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             eventModalTitle.textContent = 'Add New Event';
             if (dateForNewEvent) eventDateInput.value = dateForNewEvent;
-            setFormEditable(true); // Assumes only 'uploader' can trigger this path
+            setFormEditable(true);
         }
         eventModal.style.display = 'block';
     }
 
     function setFormEditable(isEditable) {
-        // ... (setFormEditable remains largely the same)
-        // ... but ensure deleteEventBtn logic considers 'uploader' role for its visibility if called independently.
         eventDateInput.disabled = !isEditable;
         startTimeInput.disabled = !isEditable;
         endTimeInput.disabled = !isEditable;
         locationInput.disabled = !isEditable;
         descriptionInput.disabled = !isEditable;
-        saveEventBtn.style.display = isEditable ? 'inline-block' : 'none';
+        if(saveEventBtn) saveEventBtn.style.display = isEditable ? 'inline-block' : 'none';
+        
         const currentEventId = eventIdInput.value;
         const currentRoleForEdit = localStorage.getItem('exodusUserRole');
         if (isEditable && currentEventId && currentRoleForEdit === 'uploader') {
-             deleteEventBtn.style.display = 'inline-block';
+             if(deleteEventBtn) deleteEventBtn.style.display = 'inline-block';
         } else {
-            deleteEventBtn.style.display = 'none';
+            if(deleteEventBtn) deleteEventBtn.style.display = 'none';
         }
     }
 
-    function closeEventModal() { /* ... as before ... */ 
+    function closeEventModal() { 
          if(eventModal) eventModal.style.display = 'none';
     }
 
-    // Handle Event Form Submission (check for 'uploader' role)
     if (eventForm) {
         eventForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const currentRoleForSubmit = localStorage.getItem('exodusUserRole');
-            if (currentRoleForSubmit !== 'uploader') { // Check for 'uploader'
-                console.warn("calendar.js: Non-uploader tried to submit event form.");
-                return;
-            }
-            // ... (rest of submit logic as before, using eventsCollection.doc().update() or .add()) ...
-            const eventData = { /* ... */ 
+            if (currentRoleForSubmit !== 'uploader') { return; }
+            const eventData = { 
                 date: eventDateInput.value,
                 startTime: startTimeInput.value,
                 endTime: endTimeInput.value,
@@ -259,15 +270,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Handle Delete Event (check for 'uploader' role)
     if (deleteEventBtn) {
         deleteEventBtn.addEventListener('click', () => {
             const currentRoleForDelete = localStorage.getItem('exodusUserRole');
-            if (currentRoleForDelete !== 'uploader') { // Check for 'uploader'
-                console.warn("calendar.js: Non-uploader tried to delete event.");
-                return;
-            }
-            // ... (rest of delete logic as before) ...
+            if (currentRoleForDelete !== 'uploader') { return; }
             const currentEventIdVal = eventIdInput.value;
             if (currentEventIdVal && confirm('Are you sure you want to delete this event?')) {
                 eventsCollection.doc(currentEventIdVal).delete()
@@ -278,14 +284,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Event Listeners for Calendar Navigation & Modal ---
-    // ... (Prev/Next month button listeners remain the same, calling fetchAndListenForEvents) ...
-    if (prevMonthBtn) { prevMonthBtn.addEventListener('click', () => { /* ... */ currentDate.setMonth(currentDate.getMonth() - 1); fetchAndListenForEvents(currentDate.getFullYear(), currentDate.getMonth()); }); }
-    if (nextMonthBtn) { nextMonthBtn.addEventListener('click', () => { /* ... */ currentDate.setMonth(currentDate.getMonth() + 1); fetchAndListenForEvents(currentDate.getFullYear(), currentDate.getMonth()); }); }
+    if (prevMonthBtn) { prevMonthBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() - 1); fetchAndListenForEvents(currentDate.getFullYear(), currentDate.getMonth()); }); }
+    if (nextMonthBtn) { nextMonthBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() + 1); fetchAndListenForEvents(currentDate.getFullYear(), currentDate.getMonth()); }); }
 
     if (addEventBtn) {
         addEventBtn.addEventListener('click', () => {
             const currentRoleForAdd = localStorage.getItem('exodusUserRole');
-            if (currentRoleForAdd === 'uploader') { // Check for 'uploader'
+            if (currentRoleForAdd === 'uploader') {
                 const today = new Date();
                 const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
                 openEventModal(null, todayStr);
@@ -294,16 +299,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (closeModalBtn) closeModalBtn.addEventListener('click', closeEventModal);
-    window.addEventListener('click', (event) => { /* ... as before ... */ 
+    window.addEventListener('click', (event) => { 
         if (eventModal && event.target == eventModal) {
             closeEventModal();
         }
     });
 
     // --- Initial Load ---
-    // UI for role and initial event fetch will now be triggered by the 'exodusUserRoleUpdated' event
-    // or if the page loads and user is already "logged in" (i.e., localStorage has role).
-    // However, to handle direct page loads where localStorage might already be set:
     if (localStorage.getItem('exodusUserUID')) {
         console.log("calendar.js: User UID found on initial load, initializing UI and fetching events.");
         initializeUIForRole();
