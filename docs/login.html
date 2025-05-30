@@ -19,13 +19,20 @@
             </div>
             <button type="submit">Login</button>
         </form>
-        <p id="errorMessage" class="error-message"></p>
+        <p id="errorMessage" class="error-message"></p> <!-- For login errors -->
+
+        <!-- NEW: Forgot Password Link and Message Area -->
+        <div class="forgot-password-section">
+            <a href="#" id="forgotPasswordLink">Forgot Password?</a>
+            <p id="resetMessage" class="reset-message"></p> <!-- For password reset messages -->
+        </div>
+        <!-- END NEW -->
     </div>
 
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <!-- Note: Firestore SDK not strictly needed on login page, but often included for consistency -->
+    <!-- Firestore SDK not strictly needed here unless auth.js starts using it directly on this page -->
     <!-- <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script> -->
 
 
