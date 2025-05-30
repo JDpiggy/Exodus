@@ -1,14 +1,21 @@
+/* docs/css/style.css */
+
 /* --- General Styles & Exodus Calendar Branding --- */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
-    background-color: #f4f7f6;
     color: #333;
     line-height: 1.6;
     display: flex;
     flex-direction: column;
     align-items: center;
     min-height: 100vh;
+    /* Page background image */
+    background-image: url('../images/backgroundforcal.png'); /* Ensure this path is correct */
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 }
 
 .container {
@@ -16,7 +23,7 @@ body {
     max-width: 1200px;
     margin: 20px auto;
     padding: 20px;
-    background-color: #fff;
+    background-color: #fff; /* Calendar container background */
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
 }
@@ -36,14 +43,18 @@ h1, h2, h3 {
 .login-container {
     width: 100%;
     max-width: 400px;
-    margin-top: 10vh;
+    margin: 10vh auto 0; /* Adjusted margin to push it down a bit */
     padding: 30px;
+    background-color: #ffffff; /* Login box background */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
     text-align: center;
 }
 
+
 .login-container input[type="email"],
 .login-container input[type="password"] {
-    width: calc(100% - 22px);
+    width: calc(100% - 22px); /* Account for padding */
     padding: 12px;
     margin-bottom: 20px;
     border: 1px solid #ddd;
@@ -68,11 +79,42 @@ h1, h2, h3 {
     background-color: #1abc9c;
 }
 
-.error-message {
+.error-message { /* For login errors */
     color: #e74c3c;
     margin-top: 10px;
     font-size: 0.9em;
-    min-height: 1.2em; /* Reserve space for error messages */
+    min-height: 1.2em; 
+}
+
+/* --- Forgot Password Styles --- */
+.forgot-password-section {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.forgot-password-section a {
+    color: #3498db;
+    text-decoration: none;
+    font-size: 0.9em;
+}
+
+.forgot-password-section a:hover {
+    text-decoration: underline;
+}
+
+.reset-message { /* For password reset success/error messages */
+    margin-top: 10px;
+    font-size: 0.9em;
+    min-height: 1.2em; /* Reserve space so layout doesn't jump */
+    line-height: 1.3;
+}
+
+.reset-message.success {
+    color: #2ecc71; /* Green for success */
+}
+
+.reset-message.error {
+    color: #e74c3c; /* Red for error */
 }
 
 
@@ -83,7 +125,7 @@ h1, h2, h3 {
     align-items: center;
     margin-bottom: 25px;
     padding: 0 10px;
-    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    flex-wrap: wrap;
 }
 
 .calendar-header button {
@@ -95,7 +137,7 @@ h1, h2, h3 {
     cursor: pointer;
     font-size: 1em;
     transition: background-color 0.3s ease;
-    margin: 5px; /* Add some margin for wrapped items */
+    margin: 5px;
 }
 
 .calendar-header button:hover {
@@ -106,20 +148,20 @@ h1, h2, h3 {
     font-size: 1.8em;
     font-weight: bold;
     color: #2c3e50;
-    margin: 5px 10px; /* Add margin */
+    margin: 5px 10px;
     text-align: center;
-    flex-grow: 1; /* Allow it to take available space */
+    flex-grow: 1;
 }
 
 #addEventBtn {
-    background-color: #2ecc71; /* Green for add */
+    background-color: #2ecc71;
 }
 #addEventBtn:hover {
     background-color: #27ae60;
 }
 
 .logout-btn {
-    background-color: #e74c3c !important; /* Red for logout */
+    background-color: #e74c3c !important;
     color: white !important;
 }
 .logout-btn:hover {
@@ -137,7 +179,7 @@ h1, h2, h3 {
     gap: 5px;
     border: 1px solid #e0e0e0;
     border-radius: 5px;
-    overflow: hidden; /* For rounded corners on children */
+    overflow: hidden;
 }
 
 .calendar-day-header {
@@ -159,10 +201,10 @@ h1, h2, h3 {
     background-position: center;
     display: flex;
     flex-direction: column;
-    cursor: default; /* Default cursor */
+    cursor: default;
 }
-.calendar-day.admin-clickable {
-    cursor: pointer; /* Pointer only for admin on empty days or day number */
+.calendar-day.admin-clickable { /* Renamed to uploader-clickable if role is 'uploader' */
+    cursor: pointer;
 }
 
 
@@ -175,15 +217,12 @@ h1, h2, h3 {
     padding: 2px 4px;
     border-radius: 3px;
     align-self: flex-start;
-    z-index: 1; /* Ensure day number is above event items if they overlap weirdly */
+    z-index: 1;
 }
 .calendar-day.other-month .day-number {
     color: #bdc3c7;
 }
 
-.calendar-day.empty-day {
-    /* Background image will be set by JS or specific classes */
-}
 .calendar-day.empty-day .day-number {
     background-color: rgba(255, 255, 255, 0.8);
     color: #555;
@@ -193,8 +232,8 @@ h1, h2, h3 {
 /* Events in Calendar */
 .event-list {
     flex-grow: 1;
-    overflow-y: auto; /* Allow scrolling if many events */
-    max-height: calc(120px - 30px); /* Adjust based on day-number height and padding */
+    overflow-y: auto;
+    max-height: calc(120px - 30px);
 }
 
 .event-item {
@@ -209,7 +248,7 @@ h1, h2, h3 {
     text-overflow: ellipsis;
     white-space: nowrap;
     transition: background-color 0.2s ease;
-    z-index: 2; /* Above day number if somehow positioned over */
+    z-index: 2;
 }
 .event-item:hover {
     background-color: #2980b9;
@@ -224,9 +263,9 @@ h1, h2, h3 {
 }
 
 
-/* Event Modal (for adding/viewing events) */
+/* Event Modal */
 .modal {
-    display: none; /* Hidden by default */
+    display: none;
     position: fixed;
     z-index: 1000;
     left: 0;
@@ -234,13 +273,13 @@ h1, h2, h3 {
     width: 100%;
     height: 100%;
     overflow: auto;
-    background-color: rgba(0,0,0,0.5); /* Dim background */
-    padding-top: 30px; /* Location of the box */
+    background-color: rgba(0,0,0,0.5);
+    padding-top: 30px;
 }
 
 .modal-content {
     background-color: #fefefe;
-    margin: 2% auto; /* Adjusted margin for smaller screens */
+    margin: 2% auto;
     padding: 25px;
     border: 1px solid #888;
     width: 90%;
@@ -320,65 +359,23 @@ h1, h2, h3 {
 
 /* Responsive Adjustments */
 @media (max-width: 768px) {
-    .calendar-day {
-        min-height: 100px;
-    }
-    .event-list {
-        max-height: calc(100px - 30px);
-    }
-    .calendar-day .day-number {
-        font-size: 0.8em;
-    }
-    .event-item {
-        font-size: 0.75em;
-    }
-    #monthYearDisplay {
-        font-size: 1.5em;
-        width: 100%; /* Take full width on small screens if nav buttons wrap */
-        order: -1; /* Move month/year display to top if header wraps */
-        margin-bottom: 10px;
-    }
-    .calendar-header button {
-        padding: 8px 12px;
-        font-size: 0.9em;
-    }
-    .user-actions {
-        width: 100%;
-        justify-content: center;
-        margin-top: 10px;
-    }
+    .calendar-day { min-height: 100px; }
+    .event-list { max-height: calc(100px - 30px); }
+    .calendar-day .day-number { font-size: 0.8em; }
+    .event-item { font-size: 0.75em; }
+    #monthYearDisplay { font-size: 1.5em; width: 100%; order: -1; margin-bottom: 10px; }
+    .calendar-header button { padding: 8px 12px; font-size: 0.9em; }
+    .user-actions { width: 100%; justify-content: center; margin-top: 10px; }
 }
 
 @media (max-width: 480px) {
-    .calendar-day-header {
-        font-size: 0.7em;
-        padding: 8px 2px;
-    }
-    .calendar-day {
-        min-height: 80px;
-        padding: 5px;
-    }
-    .event-list {
-        max-height: calc(80px - 25px);
-    }
-    .event-item {
-        padding: 3px 5px;
-        font-size: 0.7em;
-    }
-    .container {
-        padding: 10px;
-        width: 95%;
-    }
-    .modal-content {
-        width: 95%;
-        padding: 15px;
-        margin-top: 20px; /* Less top margin for modal */
-    }
-    .modal-content .form-actions button {
-        width: 100%;
-        margin-bottom: 10px;
-    }
-     .modal-content .form-actions button:last-child {
-        margin-bottom: 0;
-    }
+    .calendar-day-header { font-size: 0.7em; padding: 8px 2px; }
+    .calendar-day { min-height: 80px; padding: 5px; }
+    .event-list { max-height: calc(80px - 25px); }
+    .event-item { padding: 3px 5px; font-size: 0.7em; }
+    .container { padding: 10px; width: 95%; }
+    .login-container { padding: 20px; margin-top: 5vh; }
+    .modal-content { width: 95%; padding: 15px; margin-top: 20px; }
+    .modal-content .form-actions button { width: 100%; margin-bottom: 10px; }
+    .modal-content .form-actions button:last-child { margin-bottom: 0; }
 }
