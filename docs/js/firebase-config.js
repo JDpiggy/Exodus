@@ -11,9 +11,8 @@ const firebaseConfig = {
   measurementId: "G-6LT5GHSKCP"
 };
 
-var auth; // Using var for broader scope for subsequent scripts
-var db;   // Using var
-// var app; // If you need the app instance for v8
+var auth;
+var db;
 
 try {
   console.log("firebase-config.js: Checking for global firebase object...");
@@ -25,24 +24,22 @@ try {
 
   if (!firebase.apps.length) {
     console.log("firebase-config.js: Initializing Firebase app using firebase.initializeApp()...");
-    // For v8, initializeApp is a method of the global firebase object
-    /* app = */ firebase.initializeApp(firebaseConfig); // The return value is the app, can assign if needed
+    firebase.initializeApp(firebaseConfig);
     console.log("firebase-config.js: firebase.initializeApp called.");
   } else {
     console.log("firebase-config.js: Firebase app already initialized.");
-    /* app = firebase.app(); */ // Get default app if needed
   }
 
   console.log("firebase-config.js: Attempting to get auth and firestore instances using firebase.auth() and firebase.firestore()...");
   if (firebase.auth) {
-    auth = firebase.auth(); // v8 style
+    auth = firebase.auth();
     console.log("firebase-config.js: 'auth' instance created (v8):", auth ? 'OK' : 'FAILED');
   } else {
     console.error("firebase-config.js: CRITICAL - firebase.auth function is UNDEFINED.");
   }
 
   if (firebase.firestore) {
-    db = firebase.firestore(); // v8 style
+    db = firebase.firestore();
     console.log("firebase-config.js: 'db' instance created (v8):", db ? 'OK' : 'FAILED');
   } else {
     console.error("firebase-config.js: CRITICAL - firebase.firestore function is UNDEFINED.");
