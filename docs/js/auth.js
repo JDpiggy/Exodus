@@ -1,43 +1,51 @@
 // docs/js/auth.js
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Ensure Firebase and auth object are available.
-    // 'auth' should be globally defined by firebase-config.js or available as firebase.auth()
-    if (typeof firebase === 'undefined' || typeof auth === 'undefined') {
-        console.error("CRITICAL: Firebase or auth object is not available in auth.js. Check script loading order and firebase-config.js.");
-        alert("Firebase services not loaded correctly. Application might not work. Check console.");
-        return; // Stop execution if Firebase auth is not ready
+    if (typeof firebase === 'undefined' || typeof auth === 'undefined' || typeof db === 'undefined') {
+        console.error("CRITICAL: Firebase, auth, or db object is not available in auth.js. Check script loading order and firebase-config.js.");
+        // alert("Firebase services not loaded correctly. Application might not work. Check console."); // Alert removed for cleaner experience, console error is key
+        return;
     }
 
     const loginForm = document.getElementById('loginForm');
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
     const errorMessage = document.getElementById('errorMessage');
-    const logoutBtn = document.getElementById('logoutBtn'); // On index.html
+    const logoutBtn = document.getElementById('logoutBtn');
 
-    // Function to set user role based on custom claims
-    function setUserRoleFromClaims(user) {
+    // Function to get user role from Firestore
+    function fetchAndSetUserAccessLevel(user) {
         if (!user) {
             localStorage.removeItem('exodusUserRole');
             localStorage.removeItem('exodusUserUID');
-            return Promise.resolve(null); // Or reject, depending on desired handling
+            return Promise.resolve(null);
         }
-        return user.getIdTokenResult(true) // Force refresh to get latest claims
-            .then((idTokenResult) => {
-                if (idTokenResult.claims.admin === true) {
-                    localStorage.setItem('exodusUserRole', 'admin');
+
+        console.log(`auth.js: Fetching access level for user UID: ${user.uid}`);
+        const userDocRef = db.collection('users').doc(user.uid);
+        return userDocRef.get()
+            .then((doc) => {
+                let accessLevel = 'viewer'; // Default to viewer
+                if (doc.exists && doc.data() && doc.data().access) { // Check if doc.data() exists
+                    accessLevel = doc.data().access; // "uploader" or "viewer"
+                    console.log(`auth.js: User ${user.uid} access level from Firestore: ${accessLevel}`);
                 } else {
-                    localStorage.setItem('exodusUserRole', 'viewer');
+                    console.warn(`auth.js: No user document or 'access' field found for UID ${user.uid} in Firestore. Defaulting to 'viewer'.`);
+                    // Optional: Create a user document here if it doesn't exist with default "viewer" access on first login
+                    // This is good practice for new users if you don't have a separate signup flow that creates this doc.
+                    // userDocRef.set({ email: user.email, access: 'viewer', createdAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true })
+                    //  .then(() => console.log(`auth.js: Created default user profile for ${user.uid}`))
+                    //  .catch(err => console.error(`auth.js: Error creating default user profile:`, err));
                 }
+                localStorage.setItem('exodusUserRole', accessLevel);
                 localStorage.setItem('exodusUserUID', user.uid);
-                console.log("User role set from claims:", localStorage.getItem('exodusUserRole'));
-                return localStorage.getItem('exodusUserRole');
+                return accessLevel;
             })
             .catch((error) => {
-                console.error("Error getting ID token result / custom claims in auth.js:", error);
-                localStorage.setItem('exodusUserRole', 'viewer'); // Fallback to viewer
+                console.error("auth.js: Error fetching user document from Firestore:", error);
+                localStorage.setItem('exodusUserRole', 'viewer'); // Fallback
                 localStorage.setItem('exodusUserUID', user.uid);
-                if (errorMessage) errorMessage.textContent = "Error verifying user role. Defaulting to viewer.";
+                if (errorMessage) errorMessage.textContent = "Error fetching user role. Defaulting to viewer.";
                 return 'viewer';
             });
     }
@@ -47,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loginForm.addEventListener('submit', (event) => {
             event.preventDefault();
             if (!emailInput || !passwordInput) {
-                console.error("Email or password input field not found.");
+                console.error("auth.js: Email or password input field not found.");
                 if(errorMessage) errorMessage.textContent = "Login form fields missing.";
                 return;
             }
@@ -58,21 +66,20 @@ document.addEventListener('DOMContentLoaded', () => {
             auth.signInWithEmailAndPassword(email, password)
                 .then((userCredential) => {
                     const user = userCredential.user;
-                    return setUserRoleFromClaims(user);
+                    return fetchAndSetUserAccessLevel(user);
                 })
-                .then((role) => {
-                    if (role) { // Ensure role was successfully determined
-                        console.log("User logged in with role:", role);
+                .then((accessLevel) => {
+                    if (accessLevel) {
+                        console.log("auth.js: User logged in with access level (role):", accessLevel);
                         window.location.href = 'index.html';
                     } else {
-                        // This case should ideally be handled within setUserRoleFromClaims error
-                        console.error("Role could not be determined after login.");
+                        console.error("auth.js: Access level could not be determined after login.");
                         if(errorMessage) errorMessage.textContent = "Could not determine user role after login.";
                     }
                 })
                 .catch((error) => {
                     if(errorMessage) errorMessage.textContent = "Login failed: " + error.message;
-                    console.error("Login error in auth.js:", error);
+                    console.error("auth.js: Login error:", error);
                 });
         });
     }
@@ -85,32 +92,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.removeItem('exodusUserUID');
                 window.location.href = 'login.html';
             }).catch((error) => {
-                console.error("Logout error in auth.js:", error);
+                console.error("auth.js: Logout error:", error);
             });
         });
     }
 
     // Auth State Change Listener
     auth.onAuthStateChanged(user => {
-        const currentPage = window.location.pathname.split("/").pop() || "index.html"; // Default to index if path is just '/'
+        const currentPage = window.location.pathname.split("/").pop() || "index.html";
         const isLoggedIn = !!user;
         
         if (isLoggedIn) {
-            setUserRoleFromClaims(user).then(role => {
-                console.log("Auth state changed, user signed in. Role:", role, "Current page:", currentPage);
+            fetchAndSetUserAccessLevel(user).then(accessLevel => {
+                console.log("auth.js: Auth state changed, user signed in. Access level (role):", accessLevel, "Current page:", currentPage);
                 if (currentPage === 'login.html') {
                     window.location.href = 'index.html';
                 }
-                // If role is critical for immediate UI changes on other pages,
-                // you might dispatch an event here that calendar.js can listen to.
+                // Dispatch a custom event to notify calendar.js that role might have been set/updated
+                window.dispatchEvent(new CustomEvent('exodusUserRoleUpdated', { detail: { role: accessLevel } }));
             });
         } else {
-            console.log("Auth state changed, user signed out. Current page:", currentPage);
+            console.log("auth.js: Auth state changed, user signed out. Current page:", currentPage);
             localStorage.removeItem('exodusUserRole');
             localStorage.removeItem('exodusUserUID');
             if (currentPage !== 'login.html') {
                 window.location.href = 'login.html';
             }
+             // Dispatch a custom event to notify calendar.js that user logged out
+            window.dispatchEvent(new CustomEvent('exodusUserRoleUpdated', { detail: { role: null } }));
         }
     });
 });
