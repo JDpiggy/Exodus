@@ -1,342 +1,294 @@
 /* docs/css/style.css */
 
-/* --- General Styles & Exodus Calendar Branding --- */
+/* --- Basic Reset & Box Sizing --- */
+html {
+    box-sizing: border-box;
+}
+*, *:before, *:after {
+    box-sizing: inherit;
+}
+
+/* --- General Styles & Page Background --- */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     color: #333;
     line-height: 1.6;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     min-height: 100vh;
-    background-image: url('../images/backgroundforcal.png'); /* Ensure path is correct */
+    background-image: url('../images/backgroundforcal.png'); /* Make sure this path is correct */
     background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
     background-attachment: fixed;
-    padding-top: 20px;
-    padding-bottom: 20px;
-    box-sizing: border-box;
+    display: flex; /* Helps in centering .page-content-area if needed, or just for body padding */
+    justify-content: center; /* Center .page-content-area horizontally */
+    padding: 20px; /* Overall padding for the page, background shows here */
 }
 
-.container { /* Overall page content container */
-    width: 95%; /* Wider to accommodate side panel */
-    max-width: 1400px; /* Max width for larger screens */
-    /* margin: 20px auto; Flexbox on body handles centering */
-    padding: 20px;
-    background-color: rgba(255, 255, 255, 0.95); /* Slightly transparent white if desired over body bg */
-    /* background-color: #fff; Solid white */
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
+/* --- Overall Page Content Area --- */
+.page-content-area { /* This wraps the .container if you want outer padding different from container padding */
+    width: 100%;
+    display: flex;
+    justify-content: center;
 }
 
-h1, h2, h3 {
-    color: #2c3e50;
-    text-align: center;
+.container { /* Main white box holding title and the two columns */
+    width: 100%;
+    max-width: 1600px; /* Adjust for very wide screens */
+    padding: 25px;
+    background-color: rgba(255, 255, 255, 0.97); /* Slightly transparent white */
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
 }
 
-.header-title {
-    font-size: 2.5em;
-    margin-bottom: 10px;
+h1.header-title {
+    font-size: 2.8em;
+    margin-top: 0; /* Remove top margin if .container has padding */
+    margin-bottom: 25px;
     color: #16a085;
-}
-
-/* --- Login & Signup Page --- */
-.login-container { /* Also used by signup-container */
-    width: 100%;
-    max-width: 400px;
-    margin: 10vh auto 0;
-    padding: 30px;
-    background-color: #ffffff;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
     text-align: center;
+    font-weight: 600;
 }
 
-.login-container input[type="email"],
-.login-container input[type="password"],
-.login-container input[type="text"] { /* Added for displayName */
-    width: calc(100% - 22px);
-    padding: 12px;
-    margin-bottom: 20px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    box-sizing: border-box;
-    font-size: 1em;
-}
-
-.login-container button { /* Submit buttons for login/signup */
-    width: 100%;
-    padding: 12px;
-    background-color: #16a085;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1.1em;
-    transition: background-color 0.3s ease;
-}
-
-.login-container button:hover {
-    background-color: #1abc9c;
-}
-
-.error-message { /* For login/signup errors */
-    color: #e74c3c;
-    margin-top: 10px;
-    font-size: 0.9em;
-    min-height: 1.2em;
-}
-.reset-message.success { /* Also used by signup success message */
-    color: #2ecc71;
-}
-
-/* Forgot Password & Signup Links */
-.forgot-password-section, .form-links {
-    margin-top: 20px;
-    text-align: center;
-    font-size: 0.9em;
-}
-.forgot-password-section a, .form-links a {
-    color: #3498db;
-    text-decoration: none;
-}
-.forgot-password-section a:hover, .form-links a:hover {
-    text-decoration: underline;
-}
-.reset-message {
-    margin-top: 10px;
-    font-size: 0.9em;
-    min-height: 1.2em;
-    line-height: 1.3;
-}
-
-
-/* --- Calendar Page Layout --- */
+/* --- Main Two-Column Layout (Desktop) --- */
 .main-content-wrapper {
     display: flex;
-    flex-direction: row;
+    flex-direction: row; /* Calendar and Announcements side-by-side */
     width: 100%;
-    gap: 20px;
+    gap: 25px; /* The gap where the body background shows through */
 }
 
 .calendar-container-wrapper {
-    flex: 3; /* Calendar takes more space, adjust ratio as needed */
-    /* min-width: 0; /* Allows shrinking if needed */
+    flex: 3 1 65%; /* Grow 3, Shrink 1, Basis 65% (Calendar takes more space) */
+    min-width: 450px; /* Prevent calendar from getting too small */
+    display: flex;
+    flex-direction: column; /* Stack calendar header and grid within this wrapper */
 }
 
 .announcements-container {
-    flex: 1; /* Announcements take less space */
-    min-width: 280px;
-    max-width: 400px; /* Or adjust as needed */
-    background-color: #f8f9fa;
+    flex: 1 1 30%; /* Grow 1, Shrink 1, Basis 30% (Announcements take less space) */
+    min-width: 300px;
+    max-width: 450px; /* Max width for announcements column */
+    background-color: rgba(248, 249, 250, 0.9); /* Slightly transparent light gray */
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.05);
     display: flex;
     flex-direction: column;
-    /* Consider a max-height if .container doesn't control overall page height sufficiently */
-    max-height: 75vh; /* Example, make it scroll within itself */
+    max-height: calc(100vh - 180px); /* Adjust based on overall padding and title height */
+                                      /* Allows internal scrolling for announcements list */
 }
 
 
-/* Calendar Header */
-.calendar-header { /* Styles for the calendar header itself */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-    padding: 0 10px;
-    flex-wrap: wrap;
+/* --- Login & Signup Pages (Centered) --- */
+.login-container { /* Also used by signup-container */
+    width: 100%;
+    max-width: 400px;
+    margin: 15vh auto 0;
+    padding: 35px;
+    background-color: #ffffff;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    text-align: center;
 }
-/* Jewish Holiday Highlighting & Name Display */
-.calendar-day.holiday-day {
-    background-color: #ffe4e1; /* Light pink for holiday background */
-    /* You can add a border or other distinguishing features if desired */
-    /* border: 1px dashed #ffb6c1; */
+.login-container input[type="email"],
+.login-container input[type="password"],
+.login-container input[type="text"] {
+    width: calc(100% - 24px); padding: 12px; margin-bottom: 20px; border: 1px solid #ccc;
+    border-radius: 5px; box-sizing: border-box; font-size: 1em;
 }
+.login-container button {
+    width: 100%; padding: 12px; background-color: #16a085; color: white; border: none;
+    border-radius: 5px; cursor: pointer; font-size: 1.1em; transition: background-color 0.3s ease;
+}
+.login-container button:hover { background-color: #1abc9c; }
+.error-message { color: #e74c3c; margin-top: 12px; font-size: 0.9em; min-height: 1.3em; }
+.reset-message.success, .signup-container .reset-message.success { color: #2ecc71; } /* For signup success message */
+.forgot-password-section, .form-links { margin-top: 20px; text-align: center; font-size: 0.9em; }
+.forgot-password-section a, .form-links a { color: #3498db; text-decoration: none; }
+.forgot-password-section a:hover, .form-links a:hover { text-decoration: underline; }
+.reset-message { margin-top: 10px; font-size: 0.9em; min-height: 1.3em; line-height: 1.4; }
 
-.holiday-name {
-    font-size: 0.75em; /* Smaller font for holiday name */
-    color: #d147a3;    /* A darker pink or magenta for the text */
-    background-color: rgba(255, 255, 255, 0.7); /* Slight white background for readability */
-    padding: 2px 4px;
-    border-radius: 3px;
-    margin-top: 3px;
-    margin-bottom: 3px;
-    text-align: center; /* Or left */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    z-index: 1; /* Ensure it's generally above event items if overlapping occurs, or adjust event item z-index */
-}
 
-/* Ensure event list is still visible and functional */
-.calendar-day .event-list {
-    margin-top: 5px; /* Add some space if holidays are present */
+/* --- Calendar Specific Styles --- */
+.calendar-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 20px; padding: 0 5px; flex-wrap: wrap;
 }
-
-/* Adjust empty day background if it's also a holiday - holiday style might override */
-.calendar-day.empty-day.holiday-day {
-    background-image: none !important; /* Prevent empty day image if it's a holiday */
-    background-color: #ffe4e1; /* Ensure holiday pink is visible */
+.calendar-header button {
+    background-color: #3498db; color: white; border: none; padding: 10px 16px;
+    border-radius: 5px; cursor: pointer; font-size: 0.95em; transition: background-color 0.3s ease; margin: 4px;
 }
-.calendar-day.empty-day.holiday-day .day-number {
-    /* Ensure day number is still visible on holiday pink */
-    color: #333; /* Or a contrasting color */
-    background-color: rgba(255,255,255,0.5);
-}
-/* ... (other calendar-header button, #monthYearDisplay styles as before) ... */
-.calendar-header button { background-color: #3498db; color: white; border: none; padding: 10px 18px; border-radius: 5px; cursor: pointer; font-size: 1em; transition: background-color 0.3s ease; margin: 5px; }
 .calendar-header button:hover { background-color: #2980b9; }
-#monthYearDisplay { font-size: 1.8em; font-weight: bold; color: #2c3e50; margin: 5px 10px; text-align: center; flex-grow: 1; }
-#addEventBtn { background-color: #2ecc71; }
-#addEventBtn:hover { background-color: #27ae60; }
+#monthYearDisplay { font-size: 1.8em; font-weight: 600; color: #2c3e50; margin: 5px 15px; text-align: center; flex-grow: 1;}
+#addEventBtn { background-color: #2ecc71; } #addEventBtn:hover { background-color: #27ae60; }
 .logout-btn { background-color: #e74c3c !important; color: white !important; }
 .logout-btn:hover { background-color: #c0392b !important; }
-.user-actions { display: flex; align-items: center; }
+.user-actions { display: flex; align-items: center; margin-left: auto; /* Pushes actions to the right if space allows */ }
 
+.calendar-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px;
+    border: 1px solid #dadce0; border-radius: 8px; overflow: hidden; background-color: #fff;
+}
+.calendar-day-header {
+    background-color: #f1f3f4; padding: 12px 5px; text-align: center;
+    font-weight: 500; font-size: 0.85em; color: #5f6368;
+}
+.calendar-day {
+    min-height: 120px; border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;
+    padding: 8px; position: relative; transition: background-color 0.2s ease;
+    background-size: cover; background-position: center; display: flex; flex-direction: column; cursor: default;
+}
+.calendar-day:nth-child(7n) { border-right: none; } /* Remove right border for last day in row */
+/* Remove bottom border for last row of days (more complex, can be done with JS or :nth-last-child if grid predictable) */
 
-/* Calendar Grid & Day Cells */
-.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; border: 1px solid #e0e0e0; border-radius: 5px; overflow: hidden; }
-.calendar-day-header { background-color: #ecf0f1; padding: 12px 5px; text-align: center; font-weight: bold; font-size: 0.9em; color: #7f8c8d; }
-.calendar-day { min-height: 120px; border: 1px solid #e0e0e0; padding: 8px; position: relative; transition: background-color 0.3s ease; background-size: cover; background-position: center; display: flex; flex-direction: column; cursor: default; }
-.calendar-day.uploader-clickable { cursor: pointer; } /* Changed from admin-clickable for clarity */
-.calendar-day .day-number { font-weight: bold; font-size: 0.9em; margin-bottom: 5px; color: #34495e; background-color: rgba(255, 255, 255, 0.7); padding: 2px 4px; border-radius: 3px; align-self: flex-start; z-index: 1; }
-.calendar-day.other-month .day-number { color: #bdc3c7; }
-.calendar-day.empty-day .day-number { background-color: rgba(255, 255, 255, 0.8); color: #555; }
+.calendar-day.uploader-clickable { cursor: pointer; }
+.calendar-day .day-number {
+    font-weight: 500; font-size: 0.9em; margin-bottom: 5px; color: #3c4043;
+    background-color: rgba(255, 255, 255, 0.6); padding: 3px 5px; border-radius: 4px; align-self: flex-start; z-index: 1;
+}
+.calendar-day.other-month .day-number { color: #adb5bd; }
+.calendar-day.empty-day .day-number { background-color: rgba(255, 255, 255, 0.7); color: #70757a; }
 
-/* Current Day Highlighting */
 .calendar-day.current-day {
-    background-color: #e0f2f1; /* A light teal or a distinct color */
-    border: 2px solid #00796b;  /* A darker border */
+    background-color: #e8f0fe; /* Light blue for current day */
+    /* border: 2px solid #1a73e8; */ /* Optional border */
 }
 .calendar-day.current-day .day-number {
-    color: #004d40; /* Darker text for the day number */
-    font-weight: bold;
-    background-color: rgba(0, 121, 107, 0.1); /* Slight tint for day number bg */
+    background-color: #1a73e8; color: white; font-weight: bold;
+    width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 50%; padding: 0;
 }
+.calendar-day.holiday-day { background-color: #fce4ec; /* Light pink for holidays */ }
+.holiday-name {
+    font-size: 0.78em; color: #c2185b; background-color: rgba(255, 255, 255, 0.75);
+    padding: 2px 5px; border-radius: 3px; margin-top: 4px; text-align: center;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 1;
+}
+.calendar-day.empty-day.holiday-day { background-image: none !important; background-color: #fce4ec; }
+.calendar-day.empty-day.holiday-day .day-number { color: #424242; background-color: rgba(255,255,255,0.6); }
+
 
 /* Events in Calendar */
-.event-list { flex-grow: 1; overflow-y: auto; max-height: calc(120px - 30px); }
-.event-item { background-color: #3498db; color: white; padding: 5px 8px; border-radius: 4px; font-size: 0.8em; margin-bottom: 4px; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: background-color 0.2s ease; z-index: 2; }
-.event-item:hover { background-color: #2980b9; }
-.event-item .event-time { font-weight: bold; display: block; font-size: 0.9em; }
-.event-item .event-title { display: block; }
+.event-list { flex-grow: 1; overflow-y: auto; margin-top: 4px; max-height: calc(120px - 40px); /* Adjust based on day cell height */ }
+.event-item {
+    background-color: #4285f4; /* Google Calendar blue */
+    color: white; padding: 4px 7px; border-radius: 4px; font-size: 0.8em;
+    margin-bottom: 4px; cursor: pointer; overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; transition: background-color 0.2s ease; z-index: 2;
+}
+.event-item:hover { background-color: #1a73e8; }
+.event-item .event-time { font-weight: 500; display: block; font-size: 0.85em; }
+.event-item .event-title { opacity: 0.9; }
 
 
-/* Event Modal (styles as before) */
-.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); padding-top: 30px; }
-.modal-content { background-color: #fefefe; margin: 2% auto; padding: 25px; border: 1px solid #888; width: 90%; max-width: 550px; border-radius: 8px; box-shadow: 0 8px 20px rgba(0,0,0,0.2); position: relative; }
-.close-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; position: absolute; top: 10px; right: 20px; }
-.close-btn:hover, .close-btn:focus { color: black; text-decoration: none; cursor: pointer; }
-.modal-content h3 { margin-top: 0; color: #16a085; }
-.modal-content label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; }
-.modal-content input[type="text"], .modal-content input[type="date"], .modal-content input[type="time"], .modal-content textarea { width: calc(100% - 22px); padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 0.95em; }
-.modal-content textarea { height: 100px; resize: vertical; }
-.modal-content .form-actions button { background-color: #2ecc71; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 1em; transition: background-color 0.3s ease; margin-right: 10px; }
-.modal-content .form-actions button[type="submit"]:hover { background-color: #27ae60; }
-.modal-content .form-actions button.delete-btn { background-color: #e74c3c; }
-.modal-content .form-actions button.delete-btn:hover { background-color: #c0392b; }
-
-
-/* Announcements Section */
+/* --- Announcements Section --- */
 .announcements-container h3 {
-    margin-top: 0;
-    color: #16a085;
-    border-bottom: 1px solid #e0e0e0;
-    padding-bottom: 10px;
-    margin-bottom: 15px;
-    font-size: 1.4em;
+    margin-top: 0; color: #16a085; border-bottom: 1px solid #dadce0;
+    padding-bottom: 12px; margin-bottom: 15px; font-size: 1.35em; font-weight: 500;
 }
-
 .announcements-list {
-    flex-grow: 1;
-    overflow-y: auto;
-    margin-bottom: 15px;
-    padding-right: 10px; /* Space for scrollbar */
+    flex-grow: 1; overflow-y: auto; margin-bottom: 15px; padding-right: 8px; /* Space for scrollbar */
 }
-/* Custom scrollbar for announcements list (optional, webkit only) */
-.announcements-list::-webkit-scrollbar { width: 8px; }
-.announcements-list::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px;}
-.announcements-list::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px;}
-.announcements-list::-webkit-scrollbar-thumb:hover { background: #aaa; }
-
+.announcements-list::-webkit-scrollbar { width: 6px; }
+.announcements-list::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 10px;}
+.announcements-list::-webkit-scrollbar-thumb { background: #bdc3c7; border-radius: 10px;}
+.announcements-list::-webkit-scrollbar-thumb:hover { background: #95a5a6; }
 
 .announcement-item {
-    background-color: #fff;
-    padding: 12px 15px;
-    border-radius: 6px;
-    margin-bottom: 12px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
-    font-size: 0.9em;
+    background-color: #fff; padding: 12px 15px; border-radius: 6px;
+    margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); font-size: 0.9em;
+    border-left: 3px solid #1abc9c; /* Accent border */
 }
-
-.announcement-author {
-    font-weight: bold;
-    color: #2980b9; /* Different color for author */
-    font-size: 0.85em;
-    margin-bottom: 4px;
-}
-
-.announcement-timestamp {
-    font-size: 0.75em;
-    color: #95a5a6; /* Lighter timestamp */
-    float: right; /* Align timestamp to the right */
-    line-height: 1.5; /* Align with author if author wraps */
-}
-
-.announcement-message {
-    clear: both; /* Ensure message is below floated timestamp */
-    word-wrap: break-word;
-    line-height: 1.5;
-    margin-top: 5px; /* Space above message if author/timestamp are on one line */
-}
-
+.announcement-author { font-weight: 600; color: #2980b9; font-size: 0.85em; margin-bottom: 3px; }
+.announcement-timestamp { font-size: 0.75em; color: #7f8c8d; float: right; line-height: 1.4; }
+.announcement-message { clear: both; word-wrap: break-word; line-height: 1.5; margin-top: 4px; color: #34495e;}
 .announcement-form textarea {
-    width: calc(100% - 22px);
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-    font-size: 0.9em;
-    min-height: 70px;
-    resize: vertical;
+    width: calc(100% - 20px); padding: 10px; margin-bottom: 10px; border: 1px solid #ccc;
+    border-radius: 4px; box-sizing: border-box; font-size: 0.9em; min-height: 70px; resize: vertical;
 }
-
 .announcement-form button {
-    padding: 8px 15px;
-    background-color: #16a085;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.9em;
-    transition: background-color 0.3s ease;
-    float: right; /* Align button to the right */
+    padding: 8px 15px; background-color: #16a085; color: white; border: none;
+    border-radius: 5px; cursor: pointer; font-size: 0.9em; transition: background-color 0.3s ease; float: right;
 }
-.announcement-form button:hover {
-    background-color: #1abc9c;
-}
-.announcement-form::after { /* Clearfix for floated button */
-    content: "";
-    clear: both;
-    display: table;
-}
+.announcement-form button:hover { background-color: #1abc9c; }
+.announcement-form::after { content: ""; clear: both; display: table; } /* Clearfix */
 
 
-/* Responsive Adjustments */
-@media (max-width: 992px) {
-    .main-content-wrapper { flex-direction: column; }
-    .calendar-container-wrapper { order: 1; } /* Calendar first */
-    .announcements-container { order: 2; width: 100%; max-width: none; margin-top: 20px; height: auto; min-height: 300px; max-height: 50vh; }
+/* --- Event Modal --- */
+.modal {
+    display: none; position: fixed; z-index: 1000; left: 0; top: 0;
+    width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.65);
+    padding-top: 8vh; /* More dynamic padding */
 }
-@media (max-width: 768px) {
-    /* ... (existing responsive styles for calendar) ... */
-    #monthYearDisplay { width: auto; order: 0; flex-grow: 0; margin-bottom: 0; } /* Adjust for smaller screens */
-    .calendar-header { justify-content: center; } /* Center header items */
-    .user-actions { margin-top: 0; }
+.modal-content {
+    background-color: #fefefe; margin: 0 auto; padding: 30px; border: none;
+    width: 90%; max-width: 520px; border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2); position: relative;
 }
-/* ... (other @media queries as before) ... */
+.close-btn {
+    color: #9e9e9e; position: absolute; top: 15px; right: 20px;
+    font-size: 30px; font-weight: bold; line-height: 1;
+}
+.close-btn:hover, .close-btn:focus { color: #333; text-decoration: none; cursor: pointer; }
+/* ... (rest of modal content styles: h3, label, input, textarea, form-actions button as before) ... */
+.modal-content h3 { margin-top: 0; color: #16a085; font-size: 1.6em; margin-bottom: 20px;}
+.modal-content label { display: block; margin-bottom: 6px; font-weight: 500; color: #495057; font-size: 0.9em;}
+.modal-content input[type="text"], .modal-content input[type="date"], .modal-content input[type="time"], .modal-content textarea { width: calc(100% - 22px); padding: 10px; margin-bottom: 18px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; font-size: 0.95em; }
+.modal-content .form-actions button { margin-top: 10px; }
+
+
+/* --- MOBILE & RESPONSIVE STYLES --- */
+@media (max-width: 1024px) { /* For tablets and smaller desktops where side-by-side might be too cramped */
+    .main-content-wrapper {
+        flex-direction: column; /* Stack calendar and announcements */
+        gap: 30px;
+    }
+    .calendar-container-wrapper {
+        flex-basis: auto; min-width: 100%; order: 1;
+    }
+    .announcements-container {
+        flex-basis: auto; min-width: 100%; max-width: none; order: 2;
+        margin-top: 0; /* Gap is already handled by main-content-wrapper */
+        max-height: 50vh; /* Or auto if you prefer it to grow */
+    }
+}
+
+@media (max-width: 767px) { /* For mobile phones */
+    body { padding: 10px; }
+    .container { padding: 15px; }
+    h1.header-title { font-size: 2.2em; margin-bottom: 20px; }
+
+    .calendar-header {
+        padding: 0; flex-direction: column; align-items: stretch;
+    }
+    #monthYearDisplay { font-size: 1.5em; margin: 10px 0; order: -1; /* Month/Year first */ }
+    .calendar-header button { width: 100%; margin: 5px 0; } /* Full width buttons */
+    .user-actions { width: 100%; justify-content: space-between; margin-top: 10px; order: 1;}
+
+    .calendar-day { min-height: 90px; padding: 6px; }
+    .calendar-day .day-number { font-size: 0.85em; }
+    .holiday-name, .event-item { font-size: 0.75em; padding: 3px 5px;}
+    .event-list { max-height: calc(90px - 38px); }
+
+
+    .login-container { margin-top: 10vh; padding: 25px; }
+    .modal-content { width: 95%; padding: 20px; margin-top: 8vh; }
+    .modal-content .form-actions button { width: calc(50% - 5px); margin-right: 10px; }
+    .modal-content .form-actions button:last-child { margin-right: 0; }
+}
+
+@media (max-width: 480px) { /* Extra small screens */
+    h1.header-title { font-size: 1.8em; }
+    #monthYearDisplay { font-size: 1.3em; }
+    .calendar-day { min-height: 75px; }
+    .event-list { max-height: calc(75px - 35px); }
+    .holiday-name, .event-item { font-size: 0.7em; }
+    .announcements-container h3 { font-size: 1.15em; }
+    .announcement-item { font-size: 0.85em; }
+    .announcement-form textarea { font-size: 0.85em; min-height: 60px; }
+    .announcement-form button { font-size: 0.85em; padding: 7px 12px; }
+    .modal-content h3 { font-size: 1.3em; }
+    .modal-content input, .modal-content textarea, .modal-content label { font-size: 0.9em; }
+}
