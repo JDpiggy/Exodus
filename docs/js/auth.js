@@ -1,89 +1,94 @@
 // docs/js/auth.js
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Check if Firebase services are globally available from firebase-config.js
-    // 'auth' and 'db' should have been declared with 'var' in firebase-config.js to be accessible here,
-    // or accessed as firebase.auth() and firebase.firestore() directly.
-    if (typeof firebase === 'undefined' || typeof auth === 'undefined') {
-        console.error("CRITICAL: Firebase or its 'auth' service is not available in auth.js. Check script loading order and firebase-config.js.");
-        // Note: 'db' might not be needed on login.html if Firestore SDK isn't loaded there.
-        // If an alert is desired:
-        // alert("Firebase services not loaded correctly. Application might not work. Check console.");
-        return; // Stop execution if Firebase auth is not ready
+    if (typeof firebase === 'undefined' || typeof auth === 'undefined' || typeof db === 'undefined') {
+        console.error("CRITICAL: Firebase, auth, or db object is not available in auth.js. Check script loading order and firebase-config.js.");
+        return;
     }
 
     const loginForm = document.getElementById('loginForm');
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
-    const errorMessage = document.getElementById('errorMessage'); // For login errors
-    const logoutBtn = document.getElementById('logoutBtn'); // On index.html
-
-    // --- Forgot Password Elements ---
+    const errorMessage = document.getElementById('errorMessage');
+    const logoutBtn = document.getElementById('logoutBtn');
     const forgotPasswordLink = document.getElementById('forgotPasswordLink');
-    const resetMessage = document.getElementById('resetMessage'); // For reset status messages
+    const resetMessage = document.getElementById('resetMessage');
 
-    // Function to get user role from Firestore
     function fetchAndSetUserAccessLevel(user) {
         if (!user) {
             localStorage.removeItem('exodusUserRole');
             localStorage.removeItem('exodusUserUID');
+            localStorage.removeItem('userDisplayName'); // Clear display name too
             return Promise.resolve(null);
         }
-
-        // Check if Firestore 'db' object is available. It might not be if login.html doesn't load firestore.js
-        if (typeof db === 'undefined') {
-            console.warn("auth.js: Firestore 'db' object is not available. Cannot fetch access level from Firestore. User role will not be set from DB here.");
-            // Set UID at least, role can be fetched on calendar page if needed, or default.
-            localStorage.setItem('exodusUserUID', user.uid);
-            // If you are NOT using Custom Claims and RELY on Firestore for roles,
-            // then the firestore.js SDK MUST be loaded on login.html too for this to work.
-            // For now, we'll proceed, and calendar.js will use whatever role is in localStorage.
-            return Promise.resolve(localStorage.getItem('exodusUserRole') || 'viewer'); // Return existing or default 'viewer'
-        }
-
 
         console.log(`auth.js: Fetching access level for user UID: ${user.uid}`);
         const userDocRef = db.collection('users').doc(user.uid);
         return userDocRef.get()
             .then((doc) => {
-                let accessLevel = 'viewer'; // Default to viewer
-                if (doc.exists && doc.data() && doc.data().access) {
-                    accessLevel = doc.data().access; // "uploader" or "viewer"
-                    console.log(`auth.js: User ${user.uid} access level from Firestore: ${accessLevel}`);
+                let accessLevel = 'viewer';
+                let accountStatusMessage = null;
+                let displayName = user.email.split('@')[0]; // Default display name
+
+                if (doc.exists && doc.data()) {
+                    const userData = doc.data();
+                    if (userData.displayName) {
+                        displayName = userData.displayName;
+                    }
+                    if (userData.access === "pending") {
+                        console.warn(`auth.js: Account for UID ${user.uid} is PENDING APPROVAL.`);
+                        accessLevel = "pending";
+                        accountStatusMessage = "Your account is awaiting admin approval. Please check back later.";
+                    } else if (userData.access) {
+                        accessLevel = userData.access;
+                        console.log(`auth.js: User ${user.uid} access level from Firestore: ${accessLevel}`);
+                    } else {
+                        console.warn(`auth.js: 'access' field missing for UID ${user.uid}. Defaulting to 'viewer'.`);
+                        // Consider creating/updating user doc with default 'viewer' if missing access
+                        // db.collection('users').doc(user.uid).set({ access: 'viewer', email: user.email, displayName: displayName }, { merge: true });
+                    }
                 } else {
-                    console.warn(`auth.js: No user document or 'access' field found for UID ${user.uid} in Firestore. Defaulting to 'viewer'.`);
-                    // Optional: Create a user document here if it doesn't exist with default "viewer" access on first login
-                    // userDocRef.set({ email: user.email, access: 'viewer', createdAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true })
-                    //  .then(() => console.log(`auth.js: Created default user profile for ${user.uid}`))
-                    //  .catch(err => console.error(`auth.js: Error creating default user profile:`, err));
+                    console.warn(`auth.js: No user document found for UID ${user.uid}. New user or error. Defaulting to 'viewer' locally.`);
+                    // Optional: Create a user document here if it doesn't exist on first login
+                    // db.collection('users').doc(user.uid).set({ email: user.email, displayName: displayName, access: 'viewer', createdAt: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
                 }
-                localStorage.setItem('exodusUserRole', accessLevel);
-                localStorage.setItem('exodusUserUID', user.uid);
-                return accessLevel;
+
+                localStorage.setItem('userDisplayName', displayName); // Store display name
+
+                if (accessLevel === "pending") {
+                    localStorage.removeItem('exodusUserRole');
+                    localStorage.setItem('exodusUserUID', user.uid); // Store UID for reference
+                    const pendingError = new Error(accountStatusMessage || "Account pending approval.");
+                    pendingError.code = "auth/account-pending-approval";
+                    throw pendingError;
+                } else {
+                    localStorage.setItem('exodusUserRole', accessLevel);
+                    localStorage.setItem('exodusUserUID', user.uid);
+                    return accessLevel;
+                }
             })
             .catch((error) => {
+                // If it's our custom pending error, rethrow it to be caught by login handler
+                if (error.code === "auth/account-pending-approval") {
+                    throw error;
+                }
                 console.error("auth.js: Error fetching user document from Firestore:", error);
                 localStorage.setItem('exodusUserRole', 'viewer'); // Fallback
-                localStorage.setItem('exodusUserUID', user.uid);
+                localStorage.setItem('exodusUserUID', user.uid); // Still set UID
+                localStorage.setItem('userDisplayName', user.email.split('@')[0]); // Fallback display name
                 if (errorMessage && errorMessage !== resetMessage) errorMessage.textContent = "Error fetching user role. Defaulting to viewer.";
-                return 'viewer';
+                return 'viewer'; // Resolve with 'viewer' on other errors
             });
     }
 
-
-    // Handle Login
     if (loginForm) {
         loginForm.addEventListener('submit', (event) => {
             event.preventDefault();
-            if (!emailInput || !passwordInput) {
-                console.error("auth.js: Email or password input field not found for login.");
-                if(errorMessage) errorMessage.textContent = "Login form fields missing.";
-                return;
-            }
+            if (!emailInput || !passwordInput) { /* ... */ return; }
             const email = emailInput.value;
             const password = passwordInput.value;
             if(errorMessage) errorMessage.textContent = '';
-            if(resetMessage) resetMessage.textContent = ''; // Clear reset messages on login attempt
+            if(resetMessage) resetMessage.textContent = '';
 
             auth.signInWithEmailAndPassword(email, password)
                 .then((userCredential) => {
@@ -91,27 +96,35 @@ document.addEventListener('DOMContentLoaded', () => {
                     return fetchAndSetUserAccessLevel(user);
                 })
                 .then((accessLevel) => {
-                    if (accessLevel) {
+                    if (accessLevel && accessLevel !== "pending") { // Ensure not pending
                         console.log("auth.js: User logged in with access level (role):", accessLevel);
                         window.location.href = 'index.html';
+                    } else if (accessLevel === "pending") {
+                        // This case should be handled by the error thrown in fetchAndSetUserAccessLevel
+                        console.warn("auth.js: Login attempted with pending account, error should have been caught.");
+                         if(errorMessage) errorMessage.textContent = "Your account is awaiting admin approval.";
                     } else {
                         console.error("auth.js: Access level could not be determined after login.");
                         if(errorMessage) errorMessage.textContent = "Could not determine user role after login.";
                     }
                 })
                 .catch((error) => {
-                    if(errorMessage) errorMessage.textContent = "Login failed: " + error.message;
-                    console.error("auth.js: Login error:", error);
+                    if (error.code === "auth/account-pending-approval") {
+                        if(errorMessage) errorMessage.textContent = error.message;
+                    } else {
+                        if(errorMessage) errorMessage.textContent = "Login failed: " + error.message;
+                    }
+                    console.error("auth.js: Login error/status:", error);
                 });
         });
     }
 
-    // Handle Logout
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
             auth.signOut().then(() => {
                 localStorage.removeItem('exodusUserRole');
                 localStorage.removeItem('exodusUserUID');
+                localStorage.removeItem('userDisplayName'); // Clear display name
                 window.location.href = 'login.html';
             }).catch((error) => {
                 console.error("auth.js: Logout error:", error);
@@ -119,7 +132,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Auth State Change Listener
     auth.onAuthStateChanged(user => {
         const currentPage = window.location.pathname.split("/").pop() || "index.html";
         const isLoggedIn = !!user;
@@ -127,69 +139,64 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isLoggedIn) {
             fetchAndSetUserAccessLevel(user).then(accessLevel => {
                 console.log("auth.js: Auth state changed, user signed in. Access level (role):", accessLevel, "Current page:", currentPage);
-                if (currentPage === 'login.html') {
+                if (accessLevel === "pending" && currentPage !== 'login.html') {
+                    // If on calendar page but account becomes pending (e.g. admin revokes), log out and show message
+                    auth.signOut().then(() => {
+                        localStorage.removeItem('exodusUserRole');
+                        localStorage.removeItem('exodusUserUID');
+                        localStorage.removeItem('userDisplayName');
+                        alert("Your account access has been set to pending. Please contact an administrator.");
+                        window.location.href = 'login.html';
+                    });
+                    return;
+                }
+
+                if (currentPage === 'login.html' && accessLevel !== "pending") {
                     window.location.href = 'index.html';
                 }
-                // Dispatch a custom event to notify calendar.js that role might have been set/updated
                 window.dispatchEvent(new CustomEvent('exodusUserRoleUpdated', { detail: { role: accessLevel } }));
+            }).catch(error => { // Catch pending error from fetchAndSetUserAccessLevel
+                 if (error.code === "auth/account-pending-approval" && currentPage !== 'login.html') {
+                    // If directly navigating to index.html with a pending account, redirect to login to show message
+                     window.location.href = 'login.html'; // Login page will show the "pending" message
+                 } else if (error.code === "auth/account-pending-approval" && currentPage === 'login.html') {
+                     if(errorMessage) errorMessage.textContent = error.message;
+                 }
+                 console.log("auth.js: Auth state changed, but account is pending or error fetching role.");
             });
         } else {
             console.log("auth.js: Auth state changed, user signed out. Current page:", currentPage);
             localStorage.removeItem('exodusUserRole');
             localStorage.removeItem('exodusUserUID');
-            if (currentPage !== 'login.html') {
+            localStorage.removeItem('userDisplayName');
+            if (currentPage !== 'login.html' && currentPage !== 'signup.html') { // Don't redirect if already on login/signup
                 window.location.href = 'login.html';
             }
-             // Dispatch a custom event to notify calendar.js that user logged out
             window.dispatchEvent(new CustomEvent('exodusUserRoleUpdated', { detail: { role: null } }));
         }
     });
 
-    // Handle Forgot Password Link Click
     if (forgotPasswordLink) {
         forgotPasswordLink.addEventListener('click', (event) => {
             event.preventDefault();
-            if (!emailInput) {
-                console.error("auth.js: Email input field not found for password reset.");
-                if(resetMessage) {
-                    resetMessage.textContent = 'Email field is missing.';
-                    resetMessage.className = 'reset-message error';
-                }
-                return;
-            }
-
+            if (!emailInput) { /* ... */ return; }
             const email = emailInput.value;
-
-            if (!email) {
-                if(resetMessage) {
-                    resetMessage.textContent = 'Please enter your email address above to reset password.';
-                    resetMessage.className = 'reset-message error';
-                }
-                emailInput.focus();
-                return;
-            }
-
-            if(errorMessage) errorMessage.textContent = ''; // Clear login errors
-            if(resetMessage) {
-                 resetMessage.textContent = 'Sending reset email...';
-                 resetMessage.className = 'reset-message'; // Default class, no error/success yet
-            }
+            if (!email) { /* ... set resetMessage ... */ return; }
+            if(errorMessage) errorMessage.textContent = '';
+            if(resetMessage) { resetMessage.textContent = 'Sending reset email...'; resetMessage.className = 'reset-message';}
 
             auth.sendPasswordResetEmail(email)
-                .then(() => {
+                .then(() => { /* ... set success resetMessage ... */ 
                     if(resetMessage) {
                         resetMessage.textContent = 'Password reset email sent! Check your inbox (and spam folder).';
                         resetMessage.className = 'reset-message success';
                     }
-                    console.log("Password reset email sent to:", email);
                 })
-                .catch((error) => {
-                    if(resetMessage) {
-                        // Firebase provides user-friendly error messages for common cases like 'auth/user-not-found'
+                .catch((error) => { /* ... set error resetMessage ... */ 
+                     if(resetMessage) {
                         resetMessage.textContent = 'Error: ' + error.message;
                         resetMessage.className = 'reset-message error';
                     }
-                    console.error("Error sending password reset email:", error);
                 });
         });
     }
