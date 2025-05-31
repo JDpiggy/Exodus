@@ -357,8 +357,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (snapshot.empty) { announcementsList.innerHTML = '<p>No announcements yet.</p>'; return; }
                 snapshot.forEach(doc => { 
                     const announcement = doc.data(); const item = document.createElement('div'); item.className='announcement-item';
-                    let ts = 'Processing...'; if(announcement.timestamp?.toDate) ts = announcement.timestamp.toDate().toLocaleString([],{m:'short',d:'numeric',h:'numeric',minute:'2-digit',hour12:true});
-                    else if(announcement.timestamp) ts = new Date(announcement.timestamp).toLocaleString([],{m:'short',d:'numeric',h:'numeric',minute:'2-digit',hour12:true});
+                    //let ts = 'Processing...'; if(announcement.timestamp?.toDate) ts = announcement.timestamp.toDate().toLocaleString([],{m:'short',d:'numeric',h:'numeric',minute:'2-digit',hour12:true});
+                    //else if(announcement.timestamp) ts = new Date(announcement.timestamp).toLocaleString([],{m:'short',d:'numeric',h:'numeric',minute:'2-digit',hour12:true});
+                    let ts = 'Processing...';
+                    const options = {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true
+                    };
+                    
+                    if (announcement.timestamp?.toDate) {
+                        ts = announcement.timestamp.toDate().toLocaleString([], options);
+                    } else if (announcement.timestamp) {
+                        ts = new Date(announcement.timestamp).toLocaleString([], options);
+                    }
+
                     item.innerHTML = `<div class="announcement-author">${announcement.authorDisplayName||'System'}</div><div class="announcement-timestamp">${ts}</div><div class="announcement-message">${(announcement.message||'').replace(/\n/g,'<br>')}</div>`;
                     announcementsList.appendChild(item);
                 });
