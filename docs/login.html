@@ -11,32 +11,28 @@
         <h1 class="header-title">Exodus Calendar</h1>
         <h2>Login</h2>
         <form id="loginForm">
-            <div>
-                <input type="email" id="email" placeholder="Enter Email" required autocomplete="username">
-            </div>
-            <div>
-                <input type="password" id="password" placeholder="Enter Password" required autocomplete="current-password">
-            </div>
+            <!-- ... email and password inputs ... -->
             <button type="submit">Login</button>
         </form>
-        <p id="errorMessage" class="error-message"></p> <!-- For login errors -->
+        <p id="errorMessage" class="error-message"></p>
 
-        <!-- NEW: Forgot Password Link and Message Area -->
         <div class="forgot-password-section">
             <a href="#" id="forgotPasswordLink">Forgot Password?</a>
-            <p id="resetMessage" class="reset-message"></p> <!-- For password reset messages -->
+            <p id="resetMessage" class="reset-message"></p>
+        </div>
+
+        <!-- NEW: Link to Signup Page -->
+        <div class="form-links">
+            <p>Don't have an account? <a href="signup.html">Sign up here</a></p>
         </div>
         <!-- END NEW -->
     </div>
 
-    <!-- Firebase SDKs -->
+    <!-- Firebase SDKs (ensure firestore.js is included for role fetching) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <!-- Firestore SDK not strictly needed here unless auth.js starts using it directly on this page -->
-    <!-- <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script> -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-
-    <!-- Your Scripts -->
     <script src="js/firebase-config.js"></script>
     <script src="js/auth.js"></script>
 </body>
