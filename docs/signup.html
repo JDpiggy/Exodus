@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Exodus Calendar</title>
+    <link rel="stylesheet" href="css/style.css"> <!-- Assuming style.css has login styles -->
+</head>
+<body>
+    <div class="login-container signup-container"> <!-- Reuse login-container styles, add signup-specific if needed -->
+        <h1 class="header-title">Exodus Calendar</h1>
+        <h2>Create Account</h2>
+        <form id="signupForm">
+            <div>
+                <input type="text" id="displayName" placeholder="Display Name" required>
+            </div>
+            <div>
+                <input type="email" id="email" placeholder="Email Address" required autocomplete="username">
+            </div>
+            <div>
+                <input type="password" id="password" placeholder="Password (min. 6 characters)" required autocomplete="new-password">
+            </div>
+            <div>
+                <input type="password" id="confirmPassword" placeholder="Confirm Password" required autocomplete="new-password">
+            </div>
+            <button type="submit">Sign Up</button>
+        </form>
+        <p id="signupErrorMessage" class="error-message"></p>
+        <div class="form-links">
+            <p>Already have an account? <a href="login.html">Login here</a></p>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script> <!-- Needed to create user doc -->
+
+    <!-- Your Scripts -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/signup.js"></script> <!-- New JS file for signup logic -->
+</body>
+</html>
