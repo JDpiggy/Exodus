@@ -135,6 +135,7 @@ h1.header-title {
 .calendar-day-header {
     background-color: #f1f3f4; padding: 12px 5px; text-align: center;
     font-weight: 500; font-size: 0.85em; color: #5f6368;
+    border-radius: 4px;
 }
 .calendar-day {
     min-height: 120px; border-right: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;
@@ -171,7 +172,7 @@ h1.header-title {
 
 .calendar-day:hover { background: #e2ecfa; }
 .calendar-day {
-    border-radius: 4px;
+    border-radius: 8px;
 }
 /* Events in Calendar */
 .event-list { flex-grow: 1; overflow-y: auto; margin-top: 4px; max-height: calc(120px - 40px); /* Adjust based on day cell height */ }
