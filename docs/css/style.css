@@ -169,7 +169,10 @@ h1.header-title {
 .calendar-day.empty-day.holiday-day { background-image: none !important; background-color: #fce4ec; }
 .calendar-day.empty-day.holiday-day .day-number { color: #424242; background-color: rgba(255,255,255,0.6); }
 
-
+.calendar-day:hover { background: #e2ecfa; }
+.calendar-day {
+    border-radius: 4px;
+}
 /* Events in Calendar */
 .event-list { flex-grow: 1; overflow-y: auto; margin-top: 4px; max-height: calc(120px - 40px); /* Adjust based on day cell height */ }
 .event-item {
