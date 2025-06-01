@@ -25,8 +25,8 @@ body {
     padding: 20px; /* Overall padding for the page, background shows here */
 }
 .cowtitle{
-    height: 40px;
-    width: 160px;
+    height: 160px;
+    width: 640px;
     align-items: center;
     align: center;
     margin-top: 0;
