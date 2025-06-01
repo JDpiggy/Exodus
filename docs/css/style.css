@@ -143,7 +143,6 @@ h1.header-title {
     border: none; 
     border-radius: 5px; cursor: pointer; font-size: 0.95em; transition: background-color 0.3s ease;
 }
-            }
 .logout-btn:hover { background-color: #c0392b !important; }
 .user-actions { display: flex; align-items: center; margin-left: auto; /* Pushes actions to the right if space allows */ }
 
