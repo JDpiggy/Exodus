@@ -138,7 +138,12 @@ h1.header-title {
 .calendar-header button:hover { background-color: #2980b9; }
 #monthYearDisplay { font-size: 1.8em; font-weight: 600; color: #2c3e50; margin: 5px 15px; text-align: center; flex-grow: 1;}
 #addEventBtn { background-color: #2ecc71; } #addEventBtn:hover { background-color: #27ae60; }
-.logout-btn { background-color: #e74c3c !important; color: white !important; }
+.logout-btn { background-color: #e74c3c !important; color: white !important; 
+    display: flex; align-items: center; margin-left: auto;   
+    border: none; 
+    border-radius: 5px; cursor: pointer; font-size: 0.95em; transition: background-color 0.3s ease;
+}
+            }
 .logout-btn:hover { background-color: #c0392b !important; }
 .user-actions { display: flex; align-items: center; margin-left: auto; /* Pushes actions to the right if space allows */ }
 
