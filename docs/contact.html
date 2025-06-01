@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Info - Exodus Calendar</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .contacts-container {
+            max-width: 700px;
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.94);
+            border-radius: 12px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+            padding: 32px 24px;
+        }
+        .contact-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 32px;
+            justify-content: center;
+        }
+        .contact-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            padding: 24px 18px;
+            width: 220px;
+            text-align: center;
+        }
+        .contact-card img {
+            width: 90px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-bottom: 14px;
+            border: 2px solid #16a085;
+        }
+        .contact-card .name {
+            font-weight: 600;
+            font-size: 1.15em;
+            margin-bottom: 6px;
+            color: #16a085;
+        }
+        .contact-card .phone,
+        .contact-card .email {
+            font-size: 0.97em;
+            margin-bottom: 4px;
+            color: #34495e;
+            word-break: break-all;
+        }
+        .back-btn {
+            margin-top: 24px;
+            background: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 22px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .back-btn:hover {
+            background: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <div class="contacts-container">
+        <h1 style="text-align:center; color:#16a085;">Contact Information</h1>
+        <div class="contact-list">
+            <div class="contact-card">
+                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="John Doe">
+                <div class="name">John Doe</div>
+                <div class="phone">555-123-4567</div>
+                <div class="email">john.doe@email.com</div>
+            </div>
+            <div class="contact-card">
+                <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Jane Smith">
+                <div class="name">Jane Smith</div>
+                <div class="phone">555-987-6543</div>
+                <div class="email">jane.smith@email.com</div>
+            </div>
+            <div class="contact-card">
+                <img src="https://randomuser.me/api/portraits/men/65.jpg" alt="Alex Johnson">
+                <div class="name">Alex Johnson</div>
+                <div class="phone">555-555-1212</div>
+                <div class="email">alex.johnson@email.com</div>
+            </div>
+            <div class="contact-card">
+                <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Emily Brown">
+                <div class="name">Emily Brown</div>
+                <div class="phone">555-222-3333</div>
+                <div class="email">emily.brown@email.com</div>
+            </div>
+            <div class="contact-card">
+                <img src="https://randomuser.me/api/portraits/men/77.jpg" alt="Michael Lee">
+                <div class="name">Michael Lee</div>
+                <div class="phone">555-444-8888</div>
+                <div class="email">michael.lee@email.com</div>
+            </div>
+        </div>
+        <div style="text-align:center;">
+            <button class="back-btn" onclick="window.location.href='index.html'">Back to Calendar</button>
+        </div>
+    </div>
+</body>
+</html>
+
