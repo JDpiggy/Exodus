@@ -7,6 +7,29 @@ html {
     box-sizing: inherit;
 }
 
+.contact-btn {
+    display: block;
+    width: 100%;
+    background-color: #16a085;
+    color: #fff;
+    text-align: center;
+    padding: 12px 0;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    font-weight: 600;
+    margin-bottom: 18px;
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgba(22, 160, 133, 0.08);
+    transition: background 0.2s, box-shadow 0.2s;
+}
+.contact-btn:hover, .contact-btn:focus {
+    background-color: #1abc9c;
+    color: #fff;
+    text-decoration: none;
+    box-shadow: 0 4px 16px rgba(22, 160, 133, 0.13);
+}
+
 /* --- General Styles & Page Background --- */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
