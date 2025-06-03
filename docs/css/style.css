@@ -1,4 +1,21 @@
 
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.login-container {
+    flex: 1 0 auto; /* Take up available space */
+}
+
+.footer {
+    flex-shrink: 0;
+    text-align: center;
+    margin-top: 24px;
+    color: #888;
+    font-size: 0.95em;
+}
 /* --- Basic Reset & Box Sizing --- */
 html {
     box-sizing: border-box;
