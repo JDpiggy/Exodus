@@ -130,7 +130,7 @@ h1.header-title {
     box-shadow: inset 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.05);
     display: flex;
     flex-direction: column;
-    max-height: calc(100vh - 180px); /* Adjust based on overall padding and title height */
+    max-height: calc(100vh + 150px); /* Adjust based on overall padding and title height */
                                       /* Allows internal scrolling for announcements list */
 }
 
