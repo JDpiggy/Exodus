@@ -187,7 +187,7 @@ h1.header-title {
 
 .calendar-grid {
     display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px;
-    border: 1px solid #dadce0; border-radius: 8px; overflow: hidden; background-color: #fff;
+    border: 0px solid #dadce0; border-radius: 8px; overflow: hidden; background-color: #fff;
 }
 .calendar-day-header {
     background-color: #f1f3f4; padding: 12px 5px; text-align: center;
